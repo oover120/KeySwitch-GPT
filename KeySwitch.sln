@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1106D318-CA82-4051-A2CA-4E5BF4B20391}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeySwitch.Core", "src\KeySwitch.Core\KeySwitch.Core.csproj", "{E1A2AEC4-ABA4-4CFD-8728-631F68F42A1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeySwitch.Data", "src\KeySwitch.Data\KeySwitch.Data.csproj", "{E823362D-C5B0-42D0-90AE-60CEA5A9A6B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeySwitch.App", "src\KeySwitch.App\KeySwitch.App.csproj", "{FF8541FC-6404-4F69-A0D0-725B2E40D9CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeySwitch.Hooks", "src\KeySwitch.Hooks\KeySwitch.Hooks.csproj", "{4DA23851-321C-4F62-81D3-9CD947EAA688}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6CC2B14E-7FF1-44B9-A2F6-1F2E9C2734EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeySwitch.Tests", "tests\KeySwitch.Tests\KeySwitch.Tests.csproj", "{B6174922-16BC-4820-9A51-9F642D891CDE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{4B5F46CE-BBA2-4854-984F-6A1F01DD4E32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evaluate", "tools\Evaluate\Evaluate.csproj", "{AC9C0F78-207D-45A2-95AA-E20C451366B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E1A2AEC4-ABA4-4CFD-8728-631F68F42A1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1A2AEC4-ABA4-4CFD-8728-631F68F42A1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1A2AEC4-ABA4-4CFD-8728-631F68F42A1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1A2AEC4-ABA4-4CFD-8728-631F68F42A1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E823362D-C5B0-42D0-90AE-60CEA5A9A6B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E823362D-C5B0-42D0-90AE-60CEA5A9A6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E823362D-C5B0-42D0-90AE-60CEA5A9A6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E823362D-C5B0-42D0-90AE-60CEA5A9A6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF8541FC-6404-4F69-A0D0-725B2E40D9CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF8541FC-6404-4F69-A0D0-725B2E40D9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF8541FC-6404-4F69-A0D0-725B2E40D9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF8541FC-6404-4F69-A0D0-725B2E40D9CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DA23851-321C-4F62-81D3-9CD947EAA688}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DA23851-321C-4F62-81D3-9CD947EAA688}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DA23851-321C-4F62-81D3-9CD947EAA688}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DA23851-321C-4F62-81D3-9CD947EAA688}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6174922-16BC-4820-9A51-9F642D891CDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6174922-16BC-4820-9A51-9F642D891CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6174922-16BC-4820-9A51-9F642D891CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6174922-16BC-4820-9A51-9F642D891CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC9C0F78-207D-45A2-95AA-E20C451366B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC9C0F78-207D-45A2-95AA-E20C451366B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC9C0F78-207D-45A2-95AA-E20C451366B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC9C0F78-207D-45A2-95AA-E20C451366B1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E1A2AEC4-ABA4-4CFD-8728-631F68F42A1E} = {1106D318-CA82-4051-A2CA-4E5BF4B20391}
+		{E823362D-C5B0-42D0-90AE-60CEA5A9A6B3} = {1106D318-CA82-4051-A2CA-4E5BF4B20391}
+		{FF8541FC-6404-4F69-A0D0-725B2E40D9CF} = {1106D318-CA82-4051-A2CA-4E5BF4B20391}
+		{4DA23851-321C-4F62-81D3-9CD947EAA688} = {1106D318-CA82-4051-A2CA-4E5BF4B20391}
+		{B6174922-16BC-4820-9A51-9F642D891CDE} = {6CC2B14E-7FF1-44B9-A2F6-1F2E9C2734EA}
+		{AC9C0F78-207D-45A2-95AA-E20C451366B1} = {4B5F46CE-BBA2-4854-984F-6A1F01DD4E32}
+	EndGlobalSection
+EndGlobal

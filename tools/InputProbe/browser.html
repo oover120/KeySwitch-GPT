@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<title>KeySwitch Browser Probe</title>
+<style>
+  body { max-width: 42rem; margin: 3rem auto; font: 18px/1.5 system-ui; padding: 0 1rem; }
+  label { display: block; margin-top: 1.25rem; }
+  input, textarea, [contenteditable] { box-sizing: border-box; width: 100%; padding: .6rem; font: inherit; border: 1px solid #777; border-radius: .3rem; }
+</style>
+<h1>Проверка KeySwitch в браузере</h1>
+<p>Локальная страница для синтетического ввода. Данные никуда не отправляются.</p>
+<label>Обычное поле <input id="normal" autocomplete="off" autofocus></label>
+<label>Заголовок меняется при вводе <textarea id="changing" rows="2"></textarea></label>
+<label>Редактируемый текст</label><div contenteditable="true" aria-label="Редактируемый текст"></div>
+<label>Пробное поле пароля <input type="password" autocomplete="off"></label>
+<script>
+  let revision = 0;
+  document.getElementById('changing').addEventListener('input', () => {
+    document.title = 'KeySwitch Browser Probe ' + ++revision;
+  });
+</script>
+</html>

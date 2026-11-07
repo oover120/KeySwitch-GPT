@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="title desc">
+  <title id="title">KeySwitch — EN to RU, locally on Windows</title>
+  <desc id="desc">Dark blue banner showing ghbdtn becoming привет, with EN and RU keyboard keys.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1225"/><stop offset="1" stop-color="#172b4d"/></linearGradient>
+    <linearGradient id="accent"><stop stop-color="#67e8f9"/><stop offset="1" stop-color="#a5b4fc"/></linearGradient>
+  </defs>
+  <rect width="1280" height="400" rx="24" fill="url(#bg)"/>
+  <circle cx="1120" cy="20" r="260" fill="#3659a6" opacity=".13"/>
+  <circle cx="1000" cy="390" r="230" fill="#14b8a6" opacity=".07"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="64" y="76" fill="#9bb0cb" font-size="15" letter-spacing="4">WINDOWS · EN / RU · OFFLINE</text>
+    <text x="60" y="168" fill="#f3f7ff" font-size="76" font-weight="700" letter-spacing="-3">KeySwitch</text>
+    <text x="64" y="218" fill="#bccce0" font-size="25">Печатайте мысль. Исправим раскладку.</text>
+    <rect x="64" y="265" width="470" height="72" rx="14" fill="#0b1529" stroke="#34496b"/>
+    <text x="90" y="313" fill="#9bb0cb" font-size="30" font-family="Consolas, monospace">ghbdtn</text>
+    <path d="M260 301h54m-11-9 12 9-12 9" fill="none" stroke="#67e8f9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="345" y="313" fill="#99f6e4" font-size="30" font-family="Consolas, monospace">привет</text>
+    <rect x="824" y="125" width="128" height="134" rx="22" fill="#0a1429" stroke="#34496b" stroke-width="2"/>
+    <rect x="824" y="117" width="128" height="128" rx="22" fill="#1d304e" stroke="#526587" stroke-width="2"/>
+    <text x="888" y="196" text-anchor="middle" fill="#e4ebf8" font-size="42" font-weight="600">EN</text>
+    <path d="M974 183h42m-9-8 10 8-10 8" fill="none" stroke="url(#accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="1040" y="125" width="128" height="134" rx="22" fill="#12344a" stroke="#326576" stroke-width="2"/>
+    <rect x="1040" y="117" width="128" height="128" rx="22" fill="#164a5b" stroke="#5fc8cc" stroke-width="2"/>
+    <text x="1104" y="196" text-anchor="middle" fill="#ccfbf1" font-size="42" font-weight="600">RU</text>
+    <text x="996" y="310" text-anchor="middle" fill="#9bb0cb" font-size="18">Ваш текст остаётся на вашем ПК</text>
+  </g>
+</svg>

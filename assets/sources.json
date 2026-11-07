@@ -1,0 +1,50 @@
+{
+  "en-full": {
+    "url": "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/en/en_full.txt",
+    "sha256": "7fea67ab954e2c01df6c608c9826e594cf36f8823b3243554f88245fb75dc506"
+  },
+  "en-train": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/r2.15/en_ewt-ud-train.conllu",
+    "sha256": "a049fc40822e21593ff89ccd0a4b081443f09fae71b61f813c624aa598f6c566"
+  },
+  "en-test": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/r2.15/en_ewt-ud-test.conllu",
+    "sha256": "0612e45914359e4b36d187ef2bfeaf66fc8933210925be985c5fbf6a9e311036"
+  },
+  "en-license": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/r2.15/LICENSE.txt",
+    "sha256": "b3d1b0f4c6ae151f7eb78738f46ebd5ee140f8a7f76501ba26af123140d35ae7"
+  },
+  "en-readme": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/r2.15/README.md",
+    "sha256": "fc0c5d1344f56442af1501c8c2c850c002924ab6fe20f7de6f8667c1ebc46a79"
+  },
+  "ru-full": {
+    "url": "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/ru/ru_full.txt",
+    "sha256": "32dfd94138aea2667ec455dcc8512029e39bd4b8ea70b09410d569b69d511a30"
+  },
+  "ru-train": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_Russian-GSD/r2.15/ru_gsd-ud-train.conllu",
+    "sha256": "2e6aeb49f69455fdfa9ed948e21a3fb3783a653d5a6439268dc2cbcfcab70353"
+  },
+  "ru-test": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_Russian-GSD/r2.15/ru_gsd-ud-test.conllu",
+    "sha256": "fa3642959614db06fdab2d7464af8a0873c70d0a2b5758758231d0ef725821ea"
+  },
+  "ru-license": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_Russian-GSD/r2.15/LICENSE.txt",
+    "sha256": "899b1804a12ebc090b96339614eede1b64b686721b650a71430b55b5235f7f79"
+  },
+  "ru-readme": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_Russian-GSD/r2.15/README.md",
+    "sha256": "ce987382c18583f2dad0b39e5d42f1a5b924ac1bb89cc19d3be2799a1c8feafd"
+  },
+  "frequency-readme": {
+    "url": "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/README.md",
+    "sha256": "a92fcc50e27f7b2d5860ec1c1ce794dc4c892d945bfa4c8c3136cdfd213ee710"
+  },
+  "cc-by-sa-4": {
+    "url": "https://raw.githubusercontent.com/UniversalDependencies/UD_English-EWT/r2.15/LICENSE.txt",
+    "sha256": "b3d1b0f4c6ae151f7eb78738f46ebd5ee140f8a7f76501ba26af123140d35ae7"
+  }
+}

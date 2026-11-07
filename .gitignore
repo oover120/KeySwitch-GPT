@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+.vs/
+artifacts/
+tools/DataPrep/cache/
+*.user
+TestResults/
+.env
+.env.*
+!.env.example
+*.log
+*.jsonl
+.codex/
+.agents/
