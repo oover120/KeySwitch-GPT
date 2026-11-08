@@ -96,6 +96,7 @@ internal sealed class TrayApplication : IDisposable
             updated.Learning = settings.Learning; // retain learning that arrived while the dialog was open
             store.Save(updated); settings = updated;
             engine.Configure(Options()); enabledMenu.Checked = settings.Enabled;
+            startupMenu.Checked = settings.ElevatedStartup || StartupManager.Enabled;
             await Task.CompletedTask;
         });
         window.Closed += (_, _) => window = null; window.SelectTab(tab); window.Show();

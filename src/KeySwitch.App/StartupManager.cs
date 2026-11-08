@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Principal;
 using System.Xml.Linq;
 using Microsoft.Win32;
+using KeySwitch.Core;
 namespace KeySwitch.App;
 
 internal static class StartupManager
@@ -9,12 +10,18 @@ internal static class StartupManager
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private static string Executable => Environment.ProcessPath ?? throw new InvalidOperationException("Executable path unavailable");
     private static string TaskName => "KeySwitch-" + WindowsIdentity.GetCurrent().User!.Value;
-    public static bool Enabled
-    { get { using var key = Registry.CurrentUser.OpenSubKey(RunKey); return key?.GetValue("KeySwitch") is string; } }
+    public static StartupRegistration NormalRegistration
+    { get { using var key = Registry.CurrentUser.OpenSubKey(RunKey); return StartupRegistration.Inspect(key?.GetValue("KeySwitch") as string, Executable, System.IO.File.Exists); } }
+    public static bool Enabled => NormalRegistration.Ready;
     public static void SetNormal(bool enabled)
     {
         using var key = Registry.CurrentUser.CreateSubKey(RunKey);
-        if (enabled) key.SetValue("KeySwitch", "\"" + Executable + "\""); else key.DeleteValue("KeySwitch", false);
+        if (enabled)
+        {
+            if (!System.IO.File.Exists(Executable)) throw new InvalidOperationException("Файл программы не найден. Запустите установленную копию KeySwitch.");
+            key.SetValue("KeySwitch", StartupRegistration.CommandFor(Executable));
+        }
+        else key.DeleteValue("KeySwitch", false);
     }
     public static async Task SetElevatedAsync(bool enabled)
     {

@@ -1,9 +1,13 @@
-#define AppVersion "1.0.2"
+#define AppVersion "1.0.3"
+#ifndef PublishDir
+  #define PublishDir "..\artifacts\publish"
+#endif
 [Setup]
 AppId={{6F6F8B29-77DA-4514-A8E3-A91C2D195891}
 AppName=KeySwitch
 AppVersion={#AppVersion}
 AppPublisher=KeySwitch
+SetupIconFile=..\src\KeySwitch.App\Resources\keyswitch.ico
 AppPublisherURL=https://github.com/oover120/KeySwitch-GPT
 AppSupportURL=https://github.com/oover120/KeySwitch-GPT/issues
 AppUpdatesURL=https://github.com/oover120/KeySwitch-GPT/releases/latest
@@ -33,8 +37,8 @@ Name: "autostart"; Description: "Запускать KeySwitch при входе 
 Name: "desktopicon"; Description: "Создать ярлык на рабочем столе"; Flags: unchecked
 
 [Files]
-Source: "..\artifacts\publish\KeySwitch.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\artifacts\publish\licenses\*"; DestDir: "{app}\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDir}\KeySwitch.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#PublishDir}\licenses\*"; DestDir: "{app}\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\*.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\docs\banner.svg"; DestDir: "{app}\docs"; Flags: ignoreversion
 

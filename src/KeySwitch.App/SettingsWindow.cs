@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using KeySwitch.Core;
 using KeySwitch.Data;
 using Microsoft.Win32;
@@ -37,6 +38,7 @@ internal sealed class SettingsWindow : Window
     private readonly TextBlock status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 16, 0), VerticalAlignment = VerticalAlignment.Center };
     private readonly bool originalElevated;
     private readonly bool originalStartup;
+    private readonly StartupRegistration? startupRegistration;
     private readonly ComboBox theme = new() { Width = 200, HorizontalAlignment = HorizontalAlignment.Left };
     internal sealed class AppRow
     {
@@ -44,21 +46,30 @@ internal sealed class SettingsWindow : Window
         public bool IsFolder { get; set; }
         public ApplicationMode Mode { get; set; } = ApplicationMode.ManualOnly;
     }
+    internal sealed class GameRow
+    {
+        public string Name { get; set; } = "";
+    }
     private sealed record ModeChoice(ApplicationMode Value, string Label);
     public SettingsWindow(Settings settings, IReadOnlyList<LanguageProfile> profiles, string dataPath, Func<Settings, Task> save)
     {
         this.settings = settings; this.profiles = profiles; this.save = save;
         originalElevated = settings.ElevatedStartup;
-        try { originalStartup = StartupManager.Enabled || originalElevated; } catch { }
+        try { startupRegistration = StartupManager.NormalRegistration; originalStartup = startupRegistration.Registered || originalElevated; } catch { }
         Title = "KeySwitch — настройки"; Width = 830; Height = 710; MinWidth = 700; MinHeight = 570;
         FontFamily = new System.Windows.Media.FontFamily("Segoe UI Variable Text, Segoe UI"); FontSize = 14;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         appRows = new(settings.Applications.Select(r => new AppRow { Pattern = r.Pattern, IsFolder = r.IsFolder, Mode = r.Mode }));
         var root = new DockPanel { Margin = new Thickness(28, 20, 28, 20) }; Content = root;
-        var heading = new StackPanel { Margin = new Thickness(0, 0, 0, 20) };
+        var appIcon = BitmapFrame.Create(new Uri("pack://application:,,,/KeySwitch;component/Resources/keyswitch.png"));
+        Icon = appIcon;
+        var headingRow = new DockPanel { Margin = new Thickness(0, 0, 0, 20) };
+        var logo = new System.Windows.Controls.Image { Source = appIcon, Width = 52, Height = 52, Margin = new Thickness(0, 0, 14, 0), VerticalAlignment = VerticalAlignment.Center };
+        DockPanel.SetDock(logo, Dock.Left); headingRow.Children.Add(logo);
+        var heading = new StackPanel();
         heading.Children.Add(new TextBlock { Text = "KeySwitch", FontSize = 28, FontWeight = FontWeights.SemiBold });
         heading.Children.Add(new TextBlock { Text = "Русский и английский. В вашем ритме.", Margin = new Thickness(0, 4, 0, 0), Opacity = 0.7 });
-        DockPanel.SetDock(heading, Dock.Top); root.Children.Add(heading);
+        headingRow.Children.Add(heading); DockPanel.SetDock(headingRow, Dock.Top); root.Children.Add(headingRow);
         var footer = new DockPanel { Margin = new Thickness(0, 20, 0, 0), LastChildFill = true };
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         var cancel = new Button { Content = "Закрыть", MinWidth = 100, IsCancel = true, Margin = new Thickness(8, 0, 0, 0) }; cancel.Click += (_, _) => Close();
@@ -110,19 +121,77 @@ internal sealed class SettingsWindow : Window
         readers.Add(() => settings.Theme = theme.SelectedIndex switch { 1 => "Light", 2 => "Dark", _ => "System" });
         startup.IsChecked = originalStartup; startup.Margin = new Thickness(0, 24, 0, 12); administrator.IsChecked = originalElevated; administrator.Margin = new Thickness(0, 0, 0, 16);
         panel.Children.Add(startup); panel.Children.Add(administrator);
+        if (!originalElevated && startupRegistration is { Registered: true, Ready: false })
+            panel.Children.Add(new TextBlock
+            {
+                Text = startupRegistration.FileExists
+                    ? "Автозапуск указывает на другую копию KeySwitch. Нажмите «Сохранить», чтобы запускать эту копию."
+                    : "Файл в записи автозапуска не найден. Нажмите «Сохранить», чтобы исправить путь к этой копии KeySwitch.",
+                TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 12),
+                ToolTip = startupRegistration.Executable
+            });
         var threshold = Field(panel, "Порог уверенности (0.85–1.00)", settings.ConfidenceThreshold.ToString("0.00", CultureInfo.InvariantCulture));
         readers.Add(() => settings.ConfidenceThreshold = double.Parse(threshold.Text.Replace(',', '.'), CultureInfo.InvariantCulture));
     }
     private void Exceptions()
     {
-        var panel = Tab("Исключения"); Heading(panel, "Где работать", "Для каждой программы выберите режим. Правило программы имеет приоритет над автоматическим исключением игр. Добавьте строку в конце таблицы или удалите выбранную строку клавишей Delete.");
-        var grid = new DataGrid { ItemsSource = appRows, AutoGenerateColumns = false, CanUserAddRows = true, CanUserDeleteRows = true, MinHeight = 190, MaxHeight = 280, RowHeaderWidth = 20, Margin = new Thickness(0, 0, 0, 18) };
+        var panel = Tab("Исключения"); Heading(panel, "Программы и папки", "Выберите exe-файл или папку через обзор. Новое исключение выключает обработку. Режим можно изменить в таблице; правило программы имеет приоритет над списком игр.");
+        var grid = new DataGrid { ItemsSource = appRows, AutoGenerateColumns = false, CanUserAddRows = false, CanUserDeleteRows = true, MinHeight = 150, MaxHeight = 220, RowHeaderWidth = 20, Margin = new Thickness(0, 0, 0, 18), SelectionUnit = DataGridSelectionUnit.FullRow };
         grid.Columns.Add(new DataGridTextColumn { Header = "Имя exe или путь к папке", Binding = new Binding(nameof(AppRow.Pattern)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
         grid.Columns.Add(new DataGridCheckBoxColumn { Header = "Папка", Binding = new Binding(nameof(AppRow.IsFolder)), Width = 65 });
         grid.Columns.Add(new DataGridComboBoxColumn { Header = "Режим", ItemsSource = new[] { new ModeChoice(ApplicationMode.Disabled, "Выключено"), new ModeChoice(ApplicationMode.ManualOnly, "Только вручную"), new ModeChoice(ApplicationMode.Full, "Полностью") }, SelectedValuePath = "Value", DisplayMemberPath = "Label", SelectedValueBinding = new Binding(nameof(AppRow.Mode)), Width = 155 });
-        panel.Children.Add(grid); readers.Add(() => { grid.CommitEdit(DataGridEditingUnit.Cell, true); grid.CommitEdit(DataGridEditingUnit.Row, true); settings.Applications = appRows.Where(r => !string.IsNullOrWhiteSpace(r.Pattern)).Select(r => new ApplicationRule(r.Pattern.Trim(), r.IsFolder, r.Mode)).ToList(); });
-        var games = Field(panel, "Имена exe игр через запятую", string.Join(", ", settings.GameExecutables));
-        readers.Add(() => settings.GameExecutables = games.Text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList());
+        void AddApplication(string value, bool folder)
+        {
+            CommitGrid(grid);
+            var pattern = folder ? value : ApplicationProfiles.ExecutableName(value);
+            var row = appRows.FirstOrDefault(r => r.IsFolder == folder && r.Pattern.Trim().TrimEnd('\\', '/').Equals(pattern.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase));
+            if (row is null) { row = new AppRow { Pattern = pattern, IsFolder = folder, Mode = ApplicationMode.Disabled }; appRows.Add(row); }
+            grid.SelectedItem = row; grid.ScrollIntoView(row); grid.Focus();
+        }
+        var appActions = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
+        ActionButton(appActions, "Добавить программу…", () => BrowseExecutables("Добавить программу в исключения", path => AddApplication(path, false)));
+        ActionButton(appActions, "Добавить папку…", () =>
+        {
+            var dialog = new OpenFolderDialog { Title = "Выберите папку: правило действует и на вложенные папки" };
+            if (dialog.ShowDialog(this) == true) AddApplication(dialog.FolderName, true);
+        });
+        ActionButton(appActions, "Ввести имя", () =>
+        {
+            AddApplication("", false); grid.CurrentCell = new DataGridCellInfo(grid.SelectedItem, grid.Columns[0]); grid.BeginEdit();
+        });
+        var removeApp = ActionButton(appActions, "Удалить", () =>
+        {
+            var selected = grid.SelectedItems.OfType<AppRow>().ToArray(); CommitGrid(grid);
+            foreach (var row in selected) appRows.Remove(row);
+        });
+        removeApp.IsEnabled = false; grid.SelectionChanged += (_, _) => removeApp.IsEnabled = grid.SelectedItems.OfType<AppRow>().Any();
+        panel.Children.Add(appActions);
+        panel.Children.Add(new TextBlock { Text = "Программа исключается по имени exe во всех папках. Для ограничения одной папкой выберите «Добавить папку». Изменения применяются кнопкой «Сохранить».", TextWrapping = TextWrapping.Wrap, Opacity = 0.7, Margin = new Thickness(0, 0, 0, 10) });
+        panel.Children.Add(grid); readers.Add(() => { CommitGrid(grid); settings.Applications = appRows.Where(r => !string.IsNullOrWhiteSpace(r.Pattern)).Select(r => new ApplicationRule(r.IsFolder ? r.Pattern.Trim() : ApplicationProfiles.ExecutableName(r.Pattern.Trim()), r.IsFolder, r.Mode)).ToList(); });
+
+        Heading(panel, "Игры", "Добавьте exe-файлы игр через обзор. В этих играх обработка отключается автоматически. Существующие записи сохранены; вводить список через запятую больше не нужно.");
+        var gameRows = new ObservableCollection<GameRow>(settings.GameExecutables.Distinct(StringComparer.OrdinalIgnoreCase).Select(name => new GameRow { Name = name }));
+        var games = new DataGrid { ItemsSource = gameRows, AutoGenerateColumns = false, CanUserAddRows = false, CanUserDeleteRows = true, MinHeight = 85, MaxHeight = 150, RowHeaderWidth = 20, SelectionUnit = DataGridSelectionUnit.FullRow, Margin = new Thickness(0, 0, 0, 18) };
+        games.Columns.Add(new DataGridTextColumn { Header = "Исполняемый файл игры", Binding = new Binding(nameof(GameRow.Name)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+        void AddGame(string path)
+        {
+            CommitGrid(games);
+            var name = ApplicationProfiles.ExecutableName(path);
+            var row = gameRows.FirstOrDefault(r => r.Name.Trim().Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (row is null) { row = new GameRow { Name = name }; gameRows.Add(row); }
+            games.SelectedItem = row; games.ScrollIntoView(row); games.Focus();
+        }
+        var gameActions = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
+        ActionButton(gameActions, "Добавить игру…", () => BrowseExecutables("Выберите exe-файлы игр", AddGame));
+        ActionButton(gameActions, "Ввести имя", () => { AddGame(""); games.CurrentCell = new DataGridCellInfo(games.SelectedItem, games.Columns[0]); games.BeginEdit(); });
+        var removeGame = ActionButton(gameActions, "Удалить", () =>
+        {
+            var selected = games.SelectedItems.OfType<GameRow>().ToArray(); CommitGrid(games);
+            foreach (var row in selected) gameRows.Remove(row);
+        });
+        removeGame.IsEnabled = false; games.SelectionChanged += (_, _) => removeGame.IsEnabled = games.SelectedItems.OfType<GameRow>().Any();
+        panel.Children.Add(gameActions); panel.Children.Add(games);
+        readers.Add(() => { CommitGrid(games); settings.GameExecutables = gameRows.Select(r => ApplicationProfiles.ExecutableName(r.Name.Trim())).Where(name => name.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToList(); });
         Heading(panel, "Слова", "Одна строка: слово | направление. Направления: en>ru, ru>en или *. Одиночные буквы и 100 самых частых слов защищены от добавления.");
         ConfigureEditor(words, 150); words.Text = string.Join(Environment.NewLine, settings.Words.Select(w => w.Word + " | " + w.Direction)); panel.Children.Add(words);
         readers.Add(() =>
@@ -138,6 +207,26 @@ internal sealed class SettingsWindow : Window
             settings.Words = list;
         });
         panel.Children.Add(new TextBlock { Text = "Обучение: после трёх отмен слово становится исключением. Сохраняются только подтверждённые слова и счётчики.", TextWrapping = TextWrapping.Wrap, Opacity = 0.7, Margin = new Thickness(0, 14, 0, 0) });
+    }
+    private static void CommitGrid(DataGrid grid)
+    {
+        if (!grid.CommitEdit(DataGridEditingUnit.Cell, true) || !grid.CommitEdit(DataGridEditingUnit.Row, true))
+            throw new InvalidDataException("Завершите редактирование строки перед продолжением.");
+    }
+    private Button ActionButton(Panel panel, string label, Action action)
+    {
+        var button = new Button { Content = label, Margin = new Thickness(0, 0, 8, 8) };
+        button.Click += (_, _) =>
+        {
+            try { action(); status.Text = "Изменения не сохранены. Нажмите «Сохранить»."; }
+            catch (Exception ex) when (ex is InvalidDataException or InvalidOperationException or IOException or UnauthorizedAccessException) { status.Text = ex.Message; }
+        };
+        panel.Children.Add(button); return button;
+    }
+    private void BrowseExecutables(string title, Action<string> add)
+    {
+        var dialog = new OpenFileDialog { Title = title, Filter = "Программы (*.exe)|*.exe", CheckFileExists = true, Multiselect = true };
+        if (dialog.ShowDialog(this) == true) foreach (var file in dialog.FileNames) add(file);
     }
     private void Corrections()
     {
@@ -184,7 +273,7 @@ internal sealed class SettingsWindow : Window
             foreach (var read in readers) read(); settings.Validate();
             var wantsStartup = startup.IsChecked == true; var wantsElevated = wantsStartup && administrator.IsChecked == true;
             if (wantsElevated != originalElevated) await StartupManager.SetElevatedAsync(wantsElevated);
-            if (!wantsElevated && (wantsStartup != originalStartup || originalElevated)) StartupManager.SetNormal(wantsStartup);
+            if (!wantsElevated) StartupManager.SetNormal(wantsStartup);
             settings.ElevatedStartup = wantsElevated; await save(settings); Close();
         }
         catch (Exception ex) when (ex is InvalidDataException or FormatException or OverflowException or IOException or UnauthorizedAccessException or InvalidOperationException or System.ComponentModel.Win32Exception)

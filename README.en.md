@@ -18,6 +18,8 @@ Detection runs locally using bundled language models. Known source-language word
 
 ## Features
 
+**New in 1.0.3:** browse for applications, folders and games; remove selected exclusions; repair stale startup paths; and use the new keyboard icon.
+
 - Automatic English US / Russian ЙЦУКЕН layout correction at word boundaries.
 - Selected-text conversion, last-word conversion and undo shortcuts.
 - Per-application, folder and word exclusions; local learning from explicit corrections and undo.
