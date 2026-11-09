@@ -27,6 +27,7 @@ internal sealed class TrayApplication : IDisposable
     private SettingsWindow? window;
     private string lastLabel = "";
     private Icon? currentIcon;
+    private int checkingUpdate;
     public TrayApplication(System.Windows.Application app, bool smoke, bool debugFromCommandLine)
     {
         this.app = app; store = new SettingsStore(); settings = store.Load();
@@ -43,6 +44,7 @@ internal sealed class TrayApplication : IDisposable
         menu.Items.Add(enabledMenu);
         menu.Items.Add("Исключения", null, (_, _) => ShowSettings(1));
         menu.Items.Add("Настройки", null, (_, _) => ShowSettings(0));
+        menu.Items.Add("Проверить обновления", null, async (_, _) => await CheckUpdatesAsync(true));
         startupMenu = new Forms.ToolStripMenuItem("Автозапуск", null, (_, _) =>
         { try { StartupManager.SetNormal(!StartupManager.Enabled); startupMenu!.Checked = StartupManager.Enabled; } catch { Notify("Не удалось изменить автозапуск."); } });
         try { startupMenu.Checked = StartupManager.Enabled; } catch { }
@@ -61,16 +63,36 @@ internal sealed class TrayApplication : IDisposable
         { try { var error = await clipboard.ConvertAsync(context, engine.Matches); if (error is not null) Notify(error); } finally { engine.CompleteSelection(); } });
         timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) }; timer.Tick += (_, _) => RefreshIcon(); timer.Start(); RefreshIcon();
         if (store.LoadWarning is not null) Notify(store.LoadWarning);
+        if (!smoke && settings.CheckForUpdates) _ = CheckUpdatesAsync(false);
         Microsoft.Win32.SystemEvents.SessionSwitch += OnSessionSwitch;
         Microsoft.Win32.SystemEvents.UserPreferenceChanged += OnPreferencesChanged;
         // Drop temporary model-loading arrays once, never force collections during typing.
         app.Dispatcher.BeginInvoke(() => { System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce; GC.Collect(2, GCCollectionMode.Forced, true, true); }, DispatcherPriority.ApplicationIdle);
     }
+    private async Task CheckUpdatesAsync(bool manual)
+    {
+        if (Interlocked.Exchange(ref checkingUpdate, 1) != 0) return;
+        try
+        {
+            var current = typeof(TrayApplication).Assembly.GetName().Version ?? new Version(0, 0, 0);
+            var newer = await UpdateChecker.CheckAsync(current);
+            if (newer is null)
+            {
+                if (manual) System.Windows.MessageBox.Show("У вас установлена последняя версия.", "KeySwitch — обновления");
+                return;
+            }
+            var answer = System.Windows.MessageBox.Show($"Доступна новая версия KeySwitch ({newer}). Открыть страницу загрузки?", "KeySwitch — обновления", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Information);
+            if (answer == System.Windows.MessageBoxResult.Yes) Process.Start(new ProcessStartInfo(UpdateChecker.ReleasesPage) { UseShellExecute = true });
+        }
+        catch (Exception ex) when (ex is System.Net.Http.HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or InvalidOperationException or KeyNotFoundException or System.ComponentModel.Win32Exception)
+        { if (manual) System.Windows.MessageBox.Show("Не удалось проверить обновления. Проверьте подключение и попробуйте снова.", "KeySwitch — обновления"); }
+        finally { Interlocked.Exchange(ref checkingUpdate, 0); }
+    }
     private void OnSessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs args) => engine.RefreshFocus();
     private void OnPreferencesChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs args) => app.Dispatcher.BeginInvoke(() => window?.ApplyTheme());
     private EngineOptions Options() => new(settings.Enabled, settings.ConfidenceThreshold, settings.EarlySwitch, settings.SingleShift,
         settings.Typos, settings.FixCapitals, settings.Yoficator, settings.SelectionKey, settings.SelectionModifiers, settings.PauseKey, settings.PauseModifiers,
-        settings.Applications.ToArray(), settings.Words.ToArray(), new Dictionary<string, string>(settings.Replacements, StringComparer.OrdinalIgnoreCase), new Dictionary<string, string>(settings.YoWords, StringComparer.OrdinalIgnoreCase), Learned(), settings.Debug || debugFromCommandLine, settings.GameExecutables.ToArray());
+        settings.Applications.ToArray(), settings.Words.ToArray(), new Dictionary<string, string>(settings.Replacements, StringComparer.OrdinalIgnoreCase), new Dictionary<string, string>(settings.YoWords, StringComparer.OrdinalIgnoreCase), Learned(), settings.Debug || debugFromCommandLine, settings.GameExecutables.ToArray(), settings.PreferRussian);
     private Dictionary<string, string> Learned()
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);

@@ -6,7 +6,7 @@ namespace KeySwitch.Hooks;
 public sealed record EngineOptions(bool Enabled, double Threshold, bool Early, bool SingleShift, bool Typos, bool Capitals, bool Yo,
     int SelectionKey, int SelectionModifiers, int PauseKey, int PauseModifiers, IReadOnlyList<ApplicationRule> Applications,
     IReadOnlyList<WordException> Words, IReadOnlyDictionary<string, string> Replacements, IReadOnlyDictionary<string, string> YoWords, IReadOnlyDictionary<string, string> Learned, bool Debug = false,
-    IReadOnlyList<string>? GameExecutables = null);
+    IReadOnlyList<string>? GameExecutables = null, bool PreferRussian = true);
 
 public sealed class KeyboardEngine : IDisposable
 {
@@ -285,7 +285,7 @@ public sealed class KeyboardEngine : IDisposable
                 return false;
             }
             var evidence = trace is null ? null : new DetectionEvidence();
-            var detected = detector.Detect(word, layout.Id, options.Threshold, learned: options.Learned, evidence: evidence);
+            var detected = detector.Detect(word, layout.Id, options.Threshold, learned: options.Learned, evidence: evidence, preferRussian: options.PreferRussian);
             if (trace is not null && evidence is not null)
             {
                 trace.ScoreA = evidence.ScoreA;

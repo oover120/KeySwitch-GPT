@@ -74,6 +74,30 @@ public sealed class CoreTests
     [InlineData("TestPass123!")]
     public void SafeInputRemains(string input) => Assert.Null(Detector.Detect(input, "en"));
     [Fact] public void ShortAmbiguousWordIsPreserved() => Assert.Null(Detector.Detect("ok", "en"));
+    [Theory]
+    [InlineData("gj", "по")]
+    [InlineData("Gj", "По")]
+    [InlineData("gj,", "по,")]
+    [InlineData("yt", "не")]
+    public void RussianPriorityCorrectsFrequentShortWords(string input, string expected)
+    { Assert.Equal(expected, Detector.Detect(input, "en", preferRussian: true)?.Replacement); Assert.Null(Detector.Detect(input, "en", preferRussian: false)); }
+    [Theory]
+    [InlineData("ok")]
+    [InlineData("to")]
+    [InlineData("go")]
+    public void RussianPriorityPreservesCommonShortEnglishWords(string input)
+    { Assert.Null(Detector.Detect(input, "en", preferRussian: true)); }
+    [Theory]
+    [InlineData("buh", "игр")]
+    [InlineData("Buh", "Игр")]
+    [InlineData("buh,", "игр,")]
+    public void RussianPriorityResolvesKnownAmbiguousEnglishWord(string input, string expected)
+    { Assert.Equal(expected, Detector.Detect(input, "en", preferRussian: true)?.Replacement); Assert.Null(Detector.Detect(input, "en", preferRussian: false)); }
+    [Theory]
+    [InlineData("the")]
+    [InlineData("hello")]
+    public void RussianPriorityPreservesCommonEnglishWords(string word)
+    { Assert.Null(Detector.Detect(word, "en", preferRussian: true)); }
     [Fact]
     public void ThresholdAndEarlyModeAreEnforced()
     { Assert.Null(Detector.Detect("ghbdtn", "en", 1)); Assert.Null(Detector.Detect("ghbd", "en", early: true)); }

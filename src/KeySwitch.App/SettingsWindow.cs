@@ -107,6 +107,8 @@ internal sealed class SettingsWindow : Window
     {
         var panel = Tab("Общие"); Heading(panel, "Печатайте, как привыкли", "Ошибочное слово исправляется после пробела, Enter или Tab. Pause отменяет последнее исправление или меняет раскладку последнего слова.");
         Check(panel, "Автоматически исправлять раскладку", settings.Enabled, v => settings.Enabled = v);
+        Check(panel, "Предпочитать русский, если русское слово значительно вероятнее", settings.PreferRussian, v => settings.PreferRussian = v);
+        Check(panel, "Проверять обновления на GitHub при запуске", settings.CheckForUpdates, v => settings.CheckForUpdates = v);
         Check(panel, "Дополнительная диагностика фокуса (DEBUG)", settings.Debug, v => settings.Debug = v);
         Check(panel, "Исправлять две заглавные в начале: ПРивет → Привет", settings.FixCapitals, v => settings.FixCapitals = v);
         Check(panel, "Переключать язык одиночным тапом Shift", settings.SingleShift, v => settings.SingleShift = v);
@@ -258,7 +260,7 @@ internal sealed class SettingsWindow : Window
     private void About(string path)
     {
         var panel = Tab("О программе"); Heading(panel, $"KeySwitch {typeof(SettingsWindow).Assembly.GetName().Version?.ToString(3)}", "Локальный переключатель русской и английской раскладки для Windows 11 x64.");
-        panel.Children.Add(new TextBlock { Text = "Никакой телеметрии, сетевых запросов и истории набора. Настройки, исключения и счётчики обучения находятся в вашей папке профиля.", TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 18) });
+        panel.Children.Add(new TextBlock { Text = "Нет телеметрии и истории набора. Для проверки обновлений программа обращается к GitHub; автоматическую проверку можно отключить в общих настройках. Настройки, исключения и счётчики обучения находятся в вашей папке профиля.", TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 18) });
         var open = new Button { Content = "Открыть папку данных", HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 24) };
         open.Click += (_, _) => { System.IO.Directory.CreateDirectory(path); Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); }; panel.Children.Add(open);
         Heading(panel, "Границы поддержки", "RDP и виртуальные машины могут перехватывать ввод. Код, транслитерация и сокращения неоднозначны. Умляуты и нестандартные раскладки пока не поддерживаются. Терминалы и редакторы кода по умолчанию работают только вручную.");

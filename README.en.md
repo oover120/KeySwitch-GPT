@@ -18,6 +18,8 @@ Detection runs locally using bundled language models. Known source-language word
 
 ## Features
 
+**New in 1.0.5:** optional Russian priority for ambiguous and selected short words, plus configurable GitHub release checks.
+
 **New in 1.0.3:** browse for applications, folders and games; remove selected exclusions; repair stale startup paths; and use the new keyboard icon.
 
 - Automatic English US / Russian ЙЦУКЕН layout correction at word boundaries.
@@ -25,7 +27,7 @@ Detection runs locally using bundled language models. Known source-language word
 - Per-application, folder and word exclusions; local learning from explicit corrections and undo.
 - Optional typo correction, capitalization fixes, curated Russian ё replacement and sounds.
 - Tray interface with WPF settings and configurable shortcuts.
-- No account, network APIs or telemetry in the application.
+- No account or telemetry. An optional update check contacts GitHub on startup and can be disabled in settings; typed text and settings are not sent.
 
 An open-source option for users looking for a Punto Switcher alternative for EN/RU. This is an independent project with no affiliation to Punto Switcher.
 

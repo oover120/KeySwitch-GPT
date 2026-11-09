@@ -6,6 +6,8 @@ public sealed class Settings
     public int Version { get; set; } = 1;
     public bool Enabled { get; set; } = true;
     public bool Debug { get; set; }
+    public bool PreferRussian { get; set; } = true;
+    public bool CheckForUpdates { get; set; } = true;
     public double ConfidenceThreshold { get; set; } = LanguageDetector.DefaultThreshold;
     public bool EarlySwitch { get; set; }
     public bool ElevatedStartup { get; set; }

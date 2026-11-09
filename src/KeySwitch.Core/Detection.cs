@@ -45,11 +45,27 @@ public sealed class DetectionEvidence
 public sealed class LanguageDetector(IEnumerable<LanguageProfile> profiles)
 {
     public const double DefaultThreshold = 0.88;
+    private static readonly HashSet<string> ShortRussianWords = new(StringComparer.OrdinalIgnoreCase)
+        { "по", "на", "за", "из", "от", "не", "то", "он", "но", "мы", "вы", "до", "со" };
     public IReadOnlyList<LanguageProfile> Profiles { get; } = profiles.ToArray();
     public Detection? Detect(string input, string sourceId, double threshold = DefaultThreshold, bool early = false,
-        IReadOnlyDictionary<string, string>? learned = null, DetectionEvidence? evidence = null)
+        IReadOnlyDictionary<string, string>? learned = null, DetectionEvidence? evidence = null, bool preferRussian = false)
     {
-        if (input.Length < 3) return Reject(evidence, "word-too-short");
+        var shortStem = input.TrimEnd('.', ',', '!', '?', ':', ';', '"', '\'', ')', ']', '}');
+        if (shortStem.Length == 2 && preferRussian && !early && sourceId == "en")
+        {
+            var english = Profiles.FirstOrDefault(p => p.Layout.Id == "en");
+            var russian = Profiles.FirstOrDefault(p => p.Layout.Id == "ru");
+            var mapped = english is null || russian is null ? "" : english.Layout.ConvertTo(shortStem, russian.Layout);
+            if (english is not null && russian is not null && ShortRussianWords.Contains(mapped)
+                && !english.IsProtected(shortStem) && russian.Frequency(mapped) >= Math.Max(50_000L, 100L * english.Frequency(shortStem)))
+            {
+                const double confidence = 0.90;
+                Record(evidence, english, russian, shortStem, mapped, confidence, confidence >= threshold ? "accepted-short-russian" : "below-threshold");
+                return confidence >= threshold ? new(mapped + input[shortStem.Length..], "ru", confidence) : null;
+            }
+        }
+        if (shortStem.Length < 3) return Reject(evidence, "word-too-short");
         if (input.Length > WordBuffer.Capacity) return Reject(evidence, "word-too-long");
         if (PasswordHeuristic.IsSensitive(input)) return Reject(evidence, "password-heuristic");
         var source = Profiles.FirstOrDefault(p => p.Layout.Id == sourceId);
@@ -67,6 +83,19 @@ public sealed class LanguageDetector(IEnumerable<LanguageProfile> profiles)
         var original = input.TrimEnd('.', ',', '!', '?', ':', ';', '"', '\'', ')', ']', '}');
         if (source.Knows(input) || source.Knows(original))
         {
+            if (preferRussian && !early && sourceId == "en" && !source.IsProtected(original))
+            {
+                var russian = Profiles.FirstOrDefault(p => p.Layout.Id == "ru");
+                var mapped = russian is null ? "" : source.Layout.ConvertTo(original, russian.Layout);
+                var sourceFrequency = source.Frequency(original);
+                if (russian is not null && mapped.All(char.IsLetter) && russian.Knows(mapped)
+                    && russian.Frequency(mapped) >= Math.Max(1000L, 5L * sourceFrequency))
+                {
+                    const double confidence = 0.90;
+                    Record(evidence, source, russian, original, mapped, confidence, confidence >= threshold ? "accepted-russian-priority" : "below-threshold");
+                    if (confidence >= threshold) return new(mapped + input[original.Length..], russian.Layout.Id, confidence);
+                }
+            }
             if (evidence is not null)
             {
                 evidence.ScoreA = 1;
